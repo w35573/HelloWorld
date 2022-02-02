@@ -1,6 +1,12 @@
+%%writefile app.py
+
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+import requests
+from yahoo_fin import stock_info as si 
+from pandas_datareader import DataReader
+import numpy as np
 
 st.title('Charts Dashboard')
 
@@ -4998,3 +5004,34 @@ if len(dropdown) > 0:
   st.header(f'Stock Analysis of {dropdown}')
   
   st.line_chart(df)
+
+
+# for ticker in tickers:
+
+recommendations = []
+
+lhs_url = 'https://query2.finance.yahoo.com/v10/finance/quoteSummary/'
+rhs_url = '?formatted=true&crumb=swg7qs5y9UP&lang=en-US&region=US&' \
+              'modules=upgradeDowngradeHistory,recommendationTrend,' \
+              'financialData,earningsHistory,earningsTrend,industryTrend&' \
+              'corsDomain=finance.yahoo.com'
+    
+headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+if dropdown:
+  st.header('Average recommendation ratings')
+  st.write('**1:** Strong Buy   **2:** Buy **3:** Hold **4:** Underperform **5:** Sell')
+for tick in dropdown:
+  url =  lhs_url + tick + rhs_url
+  r = requests.get(url, headers=headers)
+  if not r.ok:
+      recommendation = 1
+  try:
+      result = r.json()['quoteSummary']['result'][0]
+      recommendation =result['financialData']['recommendationMean']['fmt']
+  except:
+      recommendation = 1
+      
+      recommendations.append(recommendation)
+
+  # st.write("**{}** ".format(tick))
+  slider = st.slider(tick, min_value=1.0, max_value=5.0, value=float(recommendation), step=0.1, format=None, key=None, help=None, on_change=None, args=None, kwargs=None, disabled=True)
