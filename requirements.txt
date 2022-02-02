@@ -1,3 +1,7 @@
-streamlit
-yfinance
+numpy
 pandas
+pandas_datareader
+requests
+streamlit
+yahoo_fin
+yfinance
